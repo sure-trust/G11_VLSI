@@ -5,9 +5,10 @@ input [5:0]item,
 input [6:0]amount,
 input clk,rst,
 output reg add_more,
-output reg product,
+output reg [5:0]fproduct,
 output reg [7:0]change
     );
+    reg product;
 parameter idle=7'd0;
 parameter s0=7'd1;
 parameter s1=7'd5;
@@ -21,11 +22,11 @@ parameter s8=7'd40;
 parameter s9=7'd45;
 parameter s10=7'd50;
 parameter s11=7'd55;
-parameter packet=4'b0001;
-parameter can=4'b0010;
-parameter bottle=4'b0011;
-parameter wrapper=4'b0101;
-parameter plastictub=4'b0101;
+parameter packet=3'b001;
+parameter can=3'b010;
+parameter bottle=3'b011;
+parameter wrapper=3'b101;
+parameter plastictub=3'b101;
 
 parameter Bottledwater=6'b000001;//1
 parameter Cola=6'b00010;//2
@@ -68,7 +69,8 @@ parameter Bagelswithcreamcheese=6'b100110;//38
 parameter Proteinshakes=6'b100111;//39
 parameter Instantnoodles=6'b101000;//40
 reg [6:0]s;
-reg [3:0]sitem;
+reg [2:0]sitem;
+parameter idle1=3'b000;
 always@(*)
 begin
 if(item==Snacksizedchips | item==Trailmix |item==Fruitsnacks |item==Pretzels| item==Popcorn|item==Cheesecrackers |item==Nuts|item==Cupcakes|item==Muffins |item==Cheesesticks |item==Pitachipswithhummus |item==Ricecrispytreats |item==Cheeseandcrackerpacks)
@@ -103,6 +105,9 @@ begin
       begin
       
         case(sitem)
+        idle1:begin 
+        product=0;change=7'd0;fproduct=6'd0;
+        end
             packet:case(s)
                        idle:begin
                                 product<=0;
@@ -901,6 +906,13 @@ begin
                     s<=s0;product=0;change=7'd0;
                     end
         endcase
+        if(product==1)
+        begin
+        fproduct=item;
+        sitem=idle1;
+        
+        end
+        
 end //else end
 
 end //always end
