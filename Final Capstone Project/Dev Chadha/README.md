@@ -71,3 +71,36 @@ This project is about RTL design of a Vending Machine with the following interfa
 - **money_calculator.v**- This module is responsible for accumulating the amount entered by the user.
 - **tb_TOP_old.v**- This testbench is a simpler version that was used for basic debugging. This provided basic stimulus to the DUT.
 - **testbench_TOP.v**- Two test scenariors have been checked using modern verilog concepts like tasks and functions in this testbench.
+
+
+### Waveforms
+
+#### Configuring the memory
+
+- `pwrite` goes high during the configuring state.
+
+![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/bccb433a-3d27-4eba-b51e-45999f44bd13)
+
+#### Item Purchase with no change
+
+- All relevant signals show expected behaviour
+
+![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/5c9e0806-e702-4ace-9e88-36bd7345a41a)
+
+#### Item purchase with change
+
+- All relevant signals show expected behaviour
+
+![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/573bfc9a-5e80-47aa-96db-600209b32a7f)
+
+
+## To Do
+
+- More test cases are to be added
+    - Reset Interrupt in money input state
+    - Item not available scenario (or all items exhausted) 
+- Default memory config data is not supported yet.
+- Code cleaning
+- Automate test bench, use `readmemb` function to import 32-bit data, currently, it has been added directly into the testbench. 
+
+
