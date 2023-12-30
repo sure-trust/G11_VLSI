@@ -23,11 +23,11 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
 
         // Item Select Interface
         input item_valid,
-  	input [D-1:0] item_code,
+  		input [D-1:0] item_code,
 
         // Output Interface
         output reg o_valid,
-  	output reg [D-1:0] output_item,
+  		output reg [D-1:0] output_item,
         output reg [N-1:0] note_exchange          // Depends on maximum possible change, yet to asses this
 );
 
@@ -52,11 +52,13 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
         reg money_calculator_en;
         reg change_calculator_en;
         reg config_state_write_enable;
-        reg [$clog2(K)-1:0] rdaddr;
+        reg [D-1:0] rdaddr;
         wire [31:0] rd_data_wire;
         reg [31:0] rd_data;                     // Stores 32-bit data read from config memory
         reg [31:0] wr_data;
         reg [7:0] byte4, byte3;
+  	reg reset_accumulator_money_controller;	        // Active low
+  	reg reset_change_controller;			// Active low
 
         // Signal item_available indicates availibitly of item
         wire item_available = !(rd_data[23:16] == 8'b0);
@@ -115,14 +117,6 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                 item_not_available: begin
                         next_state <= idle;
                 end
-                /*wait_for_money_input: begin
-                        if (i_valid)
-                                next_state <= money_input;
-                        else if (!rstn)
-                                next_state <= idle;
-                        else
-                                next_state <= wait_for_money_input;
-                end*/
                 money_input: begin
                         if (!rstn)
                                 next_state <= acc_to_change;
@@ -170,6 +164,10 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
                         config_state_write_enable <= 0;
+          		rd_data <= 'b0;
+          		accumulator <= 'b0;
+                	reset_accumulator_money_controller <= 0;
+                  	reset_change_controller <= 0;
                 end
                 config_mode: begin
                         o_valid <= 0;
@@ -180,6 +178,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
                         config_state_write_enable <= 1;
+                	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 wait_for_item_selection: begin
                         o_valid <= 0;
@@ -191,6 +191,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
                         rdaddr <= item_code;                    // Important to note this value initialization
+                	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 item_availablity_test: begin
                         o_valid <= 0;
@@ -202,6 +204,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         config_state_write_enable <= 0;
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
+                  	reset_accumulator_money_controller <= 1;
+                	reset_change_controller <= 1;
                 end
                 item_not_available: begin
                         o_valid <= 0;
@@ -212,6 +216,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         config_state_write_enable <= 0;
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
+                  	reset_accumulator_money_controller <= 1;
+                	reset_change_controller <= 1;
                 end
                 money_input: begin
                         o_valid <= 0;
@@ -223,6 +229,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         money_calculator_en <= 1;
                         change_calculator_en <= 0;
                         accumulator <= accumulator_wire;
+                  	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 change_calculation: begin
                         o_valid <= 0;
@@ -236,6 +244,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         change <= change_wire;
                         byte4 <= rd_data[31:24]+1;
                         byte3 <= rd_data[23:16]-1;
+                  	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 item_change_dispenser: begin
                         o_valid <= 1;
@@ -247,6 +257,10 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
                         wr_data <= {byte4, byte3, rd_data[15:0]};
+                  	accumulator <= 'b0;
+                  	//rd_data <= 'b0;
+                  	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 acc_to_change: begin
                         o_valid <= 0;
@@ -258,6 +272,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
                         change <= accumulator;
+                  	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 reset_change_dispenser: begin
                         o_valid <= 1;
@@ -268,6 +284,8 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         config_state_write_enable <= 0;
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
+                  	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 default: begin
                         o_valid <= 0;
@@ -278,12 +296,14 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                         config_state_write_enable <= 0;
                         money_calculator_en <= 0;
                         change_calculator_en <= 0;
+                  	reset_accumulator_money_controller <= 1;
+                  	reset_change_controller <= 1;
                 end
                 endcase
         end
 
         // Instantiate config_mem module
-  config_mem #(.K(K), .D(D)) config_mem_inst (
+        config_mem #(.K(K), .D(D)) config_mem_inst (
                 .pclk(pclk),
                 .system_clk(clk),
                 .paddr(paddr),
@@ -299,9 +319,10 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                 .wr_en_system(wr_en_system)
         );
 
+        // Instantiate money_calculator
         money_calculator #(.N(7)) money_calc_inst (
                 .i_valid(i_valid),
-                .reset(rstn),
+          	.reset(reset_accumulator_money_controller),
                 .money_calculator_en(money_calculator_en),
                 .note_val(note_val),
                 .item_val(rd_data[15:0]),
@@ -311,12 +332,13 @@ module TOP #(parameter K = 64, N = 7, D = 6)(
                 .accumulator_port(accumulator_wire)
         );
 
+        // Instantiate change_calculator
         change_calculator #(.N(7)) change_calc_inst (
-                .rstn(rstn),
+        	.rstn(reset_change_controller),
                 .accumulator(accumulator),
                 .item_val(rd_data[15:0]),
                 .change_calculator_en(change_calculator_en),
                 .change(change_wire)
         );
-        
+
 endmodule 
