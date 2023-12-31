@@ -182,15 +182,53 @@ task item_purchase_with_change;
 ```
 
 - All relevant signals show expected behaviour
+- Item cost is ₹80 and ₹100 coin is added. Hence, ₹20 change is expected and recieved too.
 
-![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/573bfc9a-5e80-47aa-96db-600209b32a7f)
+![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/be1b4b0d-44ba-48b4-a2c2-d1e2170aed4c)
+
+
+#### Item exhausted (without change purchase)
+
+```
+task item_exhausted_without_change;
+    begin
+      // item selection -------------
+      item_valid <= 1'b1;
+      item_code <= 7'd3;
+      #20;                      //  Check for 10ns as well
+      item_valid <= 1'b0;
+      item_code <= 7'b0;
+      // Arbitrary delay
+      #30;
+      // Money input ---------------
+      // Cost of item is 40₹
+      i_valid <= 1'b1;
+      note_val <= 7'b0010100;     // Added 40₹, ₹0 change is expected
+      #20;
+      note_val <= 7'b0;
+      i_valid <= 1'b0;
+    end
+    endtask
+```
+
+The task is invoked in a loop
+```
+for (j = 0; j<15 ; j++) begin
+         item_exhausted_without_change;
+         #80;
+       	end
+```
+- Number of items available is 10, after 10 iterations, the item is unavailable hence, no output is retured in that scenario.
+- Since, the item is unavailable, the system enters into iten not available state and then jumps to idle state.
+
+![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/4c7b2593-97e5-4bb2-859e-e7e4c392dc26)
+
 
 
 ## To Do
 
 - More test cases are to be added
     - Reset Interrupt in money input state
-    - Item not available scenario (or all items exhausted) 
 - Default memory config data is not supported yet.
 - Code cleaning
 - Automate test bench, use `readmemb` function to import 32-bit data, currently, it has been added directly into the testbench. 
