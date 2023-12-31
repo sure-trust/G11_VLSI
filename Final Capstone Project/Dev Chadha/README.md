@@ -77,17 +77,109 @@ This project is about RTL design of a Vending Machine with the following interfa
 
 #### Configuring the memory
 
-- `pwrite` goes high during the configuring state.
+This task configures the vending machine by loading 32-bit value to first 10 locations of the memory
 
-![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/bccb433a-3d27-4eba-b51e-45999f44bd13)
+```
+task configure_machine;
+    begin
+        prstn <= 1'b1;
+        #20;
+      for (i = 0; i < 10; i=i+1) 
+        begin
+            pwrite <= 1'b1;
+            paddr <= i;
+            pwdata <= config_mem_tb[i];
+            #100;
+        end
+        pwrite <= 1'b0;
+        paddr <= 'b0;
+        pwdata <= 'b0;
+        prstn <= 1'b0;
+    end
+    endtask
+```
+
+The configuration data was stored in `reg [31:0] config_mem_tb [0:9];`, well this approach is not so good. I will use `readmemb` function to import this configuring data from a text file.
+```
+// Config memory data- need to automate this
+      	config_mem_tb[0] <= 32'b00000000_00000011_00000000_00101000;
+      	config_mem_tb[1] <= 32'b00000000_00000011_00000000_00101000;
+      	config_mem_tb[2] <= 32'b00000000_00000011_00000000_01010000;
+      	config_mem_tb[3] <= 32'b00000000_00001010_00000000_00010100;
+        config_mem_tb[4] <= 32'b00000000_00001010_00000000_00010100;
+        config_mem_tb[5] <= 32'b00000000000000001000000010010100;
+        config_mem_tb[6] <= 32'b00000000000000001000000000111100;
+        config_mem_tb[7] <= 32'b00000000000000001000000100000101;
+        config_mem_tb[8] <= 32'b00000000000000001000000011110000;
+        config_mem_tb[9] <= 32'b00000000000000001000000001010000;
+```
+- APB Interface is active during the memory configuration-
+  -  `paddr` varies from 0 to 9.
+  -  `prstn` is inactive.
+  -  `pwdata` comes from the `config_mem_tb`
+  -  `pwrite` goes high during the configuring state.
+  -   Other signals are tied to zero.
+
+![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/9a42903b-2457-4daa-aa61-acd825f20ef1)
 
 #### Item Purchase with no change
 
-- All relevant signals show expected behaviour
+```
+task item_purchase_with_no_change;
+    begin
+        // item selection -------------
+        item_valid <= 1'b1;
+        item_code <= 7'b1;
+        #20;                      //  Check for 10ns as well
+        item_valid <= 1'b0;
+      	item_code <= 7'b0;
+        // Arbitrary delay
+        #50;
+        // Money input ---------------
+        // Cost of item is 40₹
+        i_valid <= 1'b1;
+        note_val <= 7'b0010100;     // First 20₹
+        #20;
+        i_valid <= 1'b0;
+      	note_val <= 7'b0;
+        #20;
+        i_valid <= 1'b1;
+        note_val <= 7'b0010100;     // Second ₹20
+        #20;
+      	i_valid <= 1'b0;
+      	note_val <= 7'b0;
+    end
+    endtask
+```
 
-![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/5c9e0806-e702-4ace-9e88-36bd7345a41a)
+- All relevant signals show expected behaviour
+- Item cost is ₹40 and ₹20 coin is added twice. Hence, no change is expected.
+
+![image](https://github.com/devchadha-jmi/G11_VLSI/assets/82091082/e096d1be-c319-479a-81d1-43059dec20a5)
 
 #### Item purchase with change
+
+```
+task item_purchase_with_change;
+    begin
+        // item selection -------------
+        item_valid <= 1'b1;
+        item_code <= 7'd2;
+        #20;                      //  Check for 10ns as well
+        item_valid <= 1'b0;
+      	item_code <= 7'b0;
+        // Arbitrary delay
+        #50;
+        // Money input ---------------
+        // Cost of item is 40₹
+        i_valid <= 1'b1;
+        note_val <= 7'b1100100;     // Added 100₹, ₹20 change is expected
+        #20;
+        i_valid <= 1'b0;
+      	note_val <= 7'b0;
+    end
+    endtask
+```
 
 - All relevant signals show expected behaviour
 
