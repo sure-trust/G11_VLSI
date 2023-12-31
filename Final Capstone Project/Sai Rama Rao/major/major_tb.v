@@ -49,12 +49,13 @@ module major_tb #(parameter items=64,itemsize=6)();
 	#50 prstn=1;
 	paddr=0; pwrite=1'b1;psel=1'b1;
 	pwdata={7'b0,7'd100,16'd150};
+	#100 paddr=1; pwdata={7'b0,7'd100,16'd100};
 	#50 pwrite=1'b0;
 	#10 rstn=1'b1;
-	#10 item_valid=1'b1;item_code=0;
+	#10 item_valid=1'b1;item_code=1;
 	#10 i_valid=1'b1;note_val=7'd100;
 	#5 i_valid=1'b0;
-	#10 i_valid=1'b1;note_val=7'd100;
+	#10 i_valid=1'b1;note_val=7'd50;
 	
 	
 	end
