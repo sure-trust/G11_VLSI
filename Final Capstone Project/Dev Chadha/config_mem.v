@@ -33,13 +33,15 @@ module config_mem #(parameter K = 64, D = 6)(
         always @(posedge system_clk) begin
             if (rd_en_system)
                 rd_data <= config_mem[rdaddr];
-            else if (wr_en_system) begin
-                config_mem[rdaddr] <= wr_data;
-                // rd_data <= 32'b0;
-            end
           else
-            rd_data <= rd_data;
+            rd_data <= 'bz;
         end
-                
+        
+  		 always @(posedge system_clk) begin
+            if (wr_en_system)
+                config_mem[rdaddr] <= wr_data;
+          else
+            config_mem[rdaddr] <= config_mem[rdaddr];
+        end
                 
 endmodule

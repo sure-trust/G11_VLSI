@@ -1,12 +1,11 @@
 // Test Plan
 //-----------
 // Machine configuration for 10 items
-// 2-test Cases
-// Test Case 1- Item purchase with no change expected
-// Test Case 2- Item purchase with change expected
-// Yet to test
-// - Reset Interrupt in money input state
-// - Item not available scenario (or all items exhausted)
+// 4-test Cases
+// Test Case 1- Item purchase with no change expected- Tested
+// Test Case 2- Item purchase with change expected- Tested
+// Test Case 3- Purchasing all items of one type- Item Not Available case- Tested
+// Test Case 4- Reset Interrupt at money-input state- Yet to test
 `timescale 1ns/1ps
 module testbench_TOP ();
     
@@ -62,7 +61,7 @@ module testbench_TOP ();
     always #50 pclk = !pclk;
 
     // Loop Variable
-    integer i;
+    integer i,j;
 
     // Config memory of testbench
     reg [31:0] config_mem_tb [0:9];
@@ -81,11 +80,11 @@ module testbench_TOP ();
         i_valid <= 1'b0;
         note_val <= 'b0;
         // Config memory data- need to automate this
-      config_mem_tb[0] <= 32'b0000000000000011_00000000_00101000;
-      config_mem_tb[1] <= 32'b0000000000000011_00000000_00101000;
-      config_mem_tb[2] <= 32'b0000000000000011_00000000_01010000;
-      config_mem_tb[3] <= 32'b0000000000000011_00000000_11010000;
-        config_mem_tb[4] <= 32'b00000000000000001000000001101100;
+      	config_mem_tb[0] <= 32'b00000000_00000011_00000000_00101000;
+      	config_mem_tb[1] <= 32'b00000000_00000011_00000000_00101000;
+      	config_mem_tb[2] <= 32'b00000000_00000011_00000000_01010000;
+      	config_mem_tb[3] <= 32'b00000000_00001010_00000000_00010100;
+        config_mem_tb[4] <= 32'b00000000_00001010_00000000_00010100;
         config_mem_tb[5] <= 32'b00000000000000001000000010010100;
         config_mem_tb[6] <= 32'b00000000000000001000000000111100;
         config_mem_tb[7] <= 32'b00000000000000001000000100000101;
@@ -107,7 +106,7 @@ module testbench_TOP ();
     begin
         prstn <= 1'b1;
         #20;
-        for (i = 0; i < 10; i=i+1) 
+      for (i = 0; i < 10; i=i+1) 
         begin
             pwrite <= 1'b1;
             paddr <= i;
@@ -128,6 +127,7 @@ module testbench_TOP ();
         item_code <= 7'b1;
         #20;                      //  Check for 10ns as well
         item_valid <= 1'b0;
+      	item_code <= 7'b0;
         // Arbitrary delay
         #50;
         // Money input ---------------
@@ -136,11 +136,13 @@ module testbench_TOP ();
         note_val <= 7'b0010100;     // First 20₹
         #20;
         i_valid <= 1'b0;
+      	note_val <= 7'b0;
         #20;
         i_valid <= 1'b1;
         note_val <= 7'b0010100;     // Second ₹20
         #20;
       	i_valid <= 1'b0;
+      	note_val <= 7'b0;
     end
     endtask
 
@@ -151,6 +153,7 @@ module testbench_TOP ();
         item_code <= 7'd2;
         #20;                      //  Check for 10ns as well
         item_valid <= 1'b0;
+      	item_code <= 7'b0;
         // Arbitrary delay
         #50;
         // Money input ---------------
@@ -159,6 +162,47 @@ module testbench_TOP ();
         note_val <= 7'b1100100;     // Added 100₹, ₹20 change is expected
         #20;
         i_valid <= 1'b0;
+      	note_val <= 7'b0;
+    end
+    endtask
+  
+  	task item_exhausted_without_change;
+    begin
+      // item selection -------------
+      item_valid <= 1'b1;
+      item_code <= 7'd3;
+      #20;                      //  Check for 10ns as well
+      item_valid <= 1'b0;
+      item_code <= 7'b0;
+      // Arbitrary delay
+      #30;
+      // Money input ---------------
+      // Cost of item is 40₹
+      i_valid <= 1'b1;
+      note_val <= 7'b0010100;     // Added 40₹, ₹0 change is expected
+      #20;
+      note_val <= 7'b0;
+      i_valid <= 1'b0;
+    end
+    endtask
+  
+  	task item_exhausted_with_change;
+    begin
+      // item selection -------------
+      item_valid <= 1'b1;
+      item_code <= 7'd4;
+      #20;                      //  Check for 10ns as well
+      item_valid <= 1'b0;
+      item_code <= 7'b0;
+      // Arbitrary delay
+      #30;
+      // Money input ---------------
+      // Cost of item is 40₹
+      i_valid <= 1'b1;
+      note_val <= 7'b0101000;     // Added 40₹, ₹0 change is expected
+      #20;
+      note_val <= 7'b0;
+      i_valid <= 1'b0;
     end
     endtask
 
@@ -170,11 +214,18 @@ module testbench_TOP ();
         configure_machine;
         #50;
         item_purchase_with_no_change;
-        #100;
-      	reset;
       	#100;
         item_purchase_with_change;
         #100;
+      	for (j = 0; j<15 ; j++) begin
+         item_exhausted_without_change;
+         #80;
+       	end
+      	#20;
+      	for (j = 0; j<15 ; j++) begin
+         item_exhausted_with_change;
+         #80;
+       	end
         $finish();
     end
   
