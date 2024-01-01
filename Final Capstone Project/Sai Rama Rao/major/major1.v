@@ -40,7 +40,7 @@ input clk,
 	input [itemsize-1:0] item_code,
 	//Output
 	output  reg o_valid,
-	output reg [itemsize-1:0]output_item,
+	output reg [itemsize:0]output_item,
 	output reg [15:0] note_change
     );
    
@@ -57,26 +57,21 @@ input clk,
     generate
     for(i=0;i<64;i=i+1)
     begin
-    always @(posedge pclk or negedge prstn)
-    begin
-    if(!prstn)
-    begin
-    item_cfg[i]<={8'd0,8'd100,16'ha};
-    end//endif
-    else
-    begin
-    if(psel & pwrite & paddr[5:0]==i)
-    begin
-    
-    item_cfg[i]<=pwdata;
-    end
-    else if(item_dispensed)
-    begin
-    item_cfg[item_selected][23:16]<= item_cfg[item_code][23:16]-1'b1;
-    item_cfg[item_selected][31:24]<=item_cfg[item_selected][31:24]+1'b1;
-    end
-    end//else 
-    end//always
+        always @(posedge pclk or negedge prstn)
+        begin
+            if(!prstn)
+                begin
+                item_cfg[i]<={8'd0,8'd100,16'ha};
+                end//endif
+            else
+                begin
+                if(psel & pwrite & paddr[5:0]==i)
+                begin
+                item_cfg[paddr]<=pwdata;
+                end
+                
+                end//else 
+        end//always
     end//for
     endgenerate
     assign prdata=item_cfg[paddr[5:0]];
@@ -129,29 +124,49 @@ begin
         item_dispensed<=1'b0;
         if(i_validr)
         begin
-            if(item_cfg[item_selected][23:16]>0)
+            if(item_cfg[item_selected][23:16]<=0)
             begin
                 o_valid<=1'b0;
-                output_item<={itemsize{1'b1}};
+                output_item<={itemsize+1{1'b1}};
                 i_validr<=0;
+                item_validr<=1'b0;
                 item_dispensed<=1'b0;
                 note_change<=amount;
+                amount=0;
             end
-            if((amount + note_val) >=item_value)
+            if((amount + note_val) >= item_value)
             begin
-                o_valid<=1'b1;
-                output_item<=item_selected;
-                i_validr<=0;
-                item_dispensed<=1'b1;
-                note_change<=(amount+note_val)-item_value;
+                if(item_selected=={itemsize{1'b1}})
+                    begin
+                    o_valid<=1'b0;
+                    output_item[itemsize]<=1'b1;
+                    output_item[itemsize-1:0]<=0;
+                    item_validr<=1'b0;
+                    i_validr<=0;
+                    item_dispensed<=1'b0;
+                    note_change<=amount;
+                    amount=0;
+    
+                    end
+                else
+                    begin
+                    o_valid<=1'b1;
+                    output_item<=item_selected;
+                    item_validr<=1'b0;
+                    i_validr<=0;
+                 item_cfg[item_selected][23:16]<= item_cfg[item_selected][23:16]-1'b1;
+                 item_cfg[item_selected][31:24]<=item_cfg[item_selected][31:24]+1'b1;
+                    item_dispensed<=1'b1;
+                    note_change<=(amount+note_val)-item_value;
+                    amount=0;
+                    end
             end
             else
-            begin
-             amount<=amount+ note_val;
-             i_validr<=0;
-            end
+                begin
+                 amount<= amount+ note_val;
+                 i_validr<=0;
+                end
             
-        
         end
         end
 end
