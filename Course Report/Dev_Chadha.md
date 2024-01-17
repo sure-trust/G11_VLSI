@@ -6,16 +6,16 @@
 
 
 <h3 align="center">SURE Trust - Skill Upgradation for Rural-youth Empowerment Trust</h3>
-  <h2> Course Name </h2>
+  <h2> VLSI Frontend </h2>
 </div>
 
 # Course Report
 
-## Name: [Your Name]
+## Name: Dev Chadha
 
-## Qualifications: [Your Qualifications]
+## Qualifications: BTech ECE, 4th Year, Jamia Millia Islamia, New Delhi
 
-Welcome to the course report for the [Course Name]! This README document provides an overview of the course, its mini projects and final project.
+Welcome to the course report for the VLSI Frontend! This README document provides an overview of the course, its mini projects and final project.
 
 ### Mini Projects and Final Project
 
