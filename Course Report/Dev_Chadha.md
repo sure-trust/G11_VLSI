@@ -23,6 +23,6 @@ Below is a table summarizing the mini projects and final project completed durin
 
 | Description                               | Link                                    |
 |-------------------------------------------|-----------------------------------------|
-| Mini Project 1: Design of a Vending Machine     | [Project Link](https://github.com/devchadha-jmi/G11_VLSI/tree/main/Mini%20Projects/Dev%20Chadha/Minor_1)                         |
-| Mini Project 2: Design of an Asynchronous FIFO | [Project Link](https://github.com/devchadha-jmi/G11_VLSI/tree/main/Mini%20Projects/Dev%20Chadha/Minor_2)                         |
-| Final Project: SURE Trust Vending Machine    | [Project Link](https://github.com/devchadha-jmi/G11_VLSI/tree/main/Final%20Capstone%20Project/Dev%20Chadha)                         |
+| Mini Project 1: Design of a Vending Machine     | [Project Link](https://github.com/sure-trust/G11_VLSI/tree/main/Mini%20Projects/Dev%20Chadha/Minor_1)                         |
+| Mini Project 2: Design of an Asynchronous FIFO | [Project Link](https://github.com/sure-trust/G11_VLSI/tree/main/Mini%20Projects/Dev%20Chadha/Minor_2)                         |
+| Final Project: SURE Trust Vending Machine    | [Project Link](https://github.com/sure-trust/G11_VLSI/tree/main/Final%20Capstone%20Project/Dev%20Chadha)                         |
