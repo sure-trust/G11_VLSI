@@ -12,7 +12,7 @@
 
 #Course Report
 
-## Name: Thurimella venkata Varun
+## Name: Thurimella Venkata Varun
 
 # Qualification: BTech ECE,3rd Year,RGUKT,kadapa district
 
