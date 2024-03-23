@@ -21,10 +21,10 @@ To enroll in the VLSI, please visit the official SURE Trust website: [Course Reg
 
 |StudentName | link|
 |------------|------|
-|Dev Chadha|[Click here]()|
-|jalli venkata ganesh|[Click here](https://github.com/sure-trust/G11_VLSI/blob/main/Course%20Report/jalli%20venkata%20ganesh.md)|
-|saideekshith|[Click here](https://github.com/sure-trust/G11_VLSI/blob/main/Course%20Report/saideekshith.md)|
-|sathish|[Click here](https://github.com/sure-trust/G11_VLSI/blob/main/Course%20Report/sathish.md)|
+|Dev Chadha|[Click here](https://github.com/sure-trust/G11_VLSI/blob/main/Course%20Report/Dev_Chadha.md)|
+|Poojitha|[Click here](https://github.com/sure-trust/G11_VLSI/blob/main/Course%20Report/poojitha%20kota.md)|
+|Sai Rama Rao|[Click here](https://github.com/sure-trust/G11_VLSI/blob/main/Course%20Report/sai%20rama%20rao%20talluri.md)|
+
 
 ## Repository Description
 
